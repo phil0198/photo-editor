@@ -11,11 +11,11 @@
   <!-- Header -->
   <header class="mb-8 text-center">
     <h1 class="text-3xl font-semibold">Lightroom Edit Companion</h1>
-    <p class="text-gray-600 mt-2">Upload your photo and choose a style to get Lightroom slider suggestions.</p>
+    <p class="text-gray-600 mt-2">Upload your photo and choose a style to get comprehensive Lightroom slider suggestions.</p>
   </header>
 
   <!-- Main Content -->
-  <main class="w-full max-w-2xl bg-white rounded-lg shadow p-6">
+  <main class="w-full max-w-4xl bg-white rounded-lg shadow p-6">
     <!-- Upload Section -->
     <section id="upload-section" class="mb-6">
       <label for="photo-upload" class="block mb-2 font-medium">Upload Photo</label>
@@ -26,33 +26,14 @@
         <p class="text-gray-500">Drag & drop an image here, or click to select</p>
         <input type="file" id="photo-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" />
       </div>
+      <img id="preview" class="hidden w-full mt-4 rounded-lg" />
+      <canvas id="canvas" class="hidden"></canvas>
     </section>
 
     <!-- Style Selector -->
     <section id="style-section" class="mb-6">
       <h2 class="text-xl font-medium mb-2">Choose a Style</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <label class="flex items-center space-x-3">
-          <input type="radio" name="style" value="bright-airy" class="form-radio h-5 w-5 text-blue-600" checked />
-          <span>Bright & Airy</span>
-        </label>
-        <label class="flex items-center space-x-3">
-          <input type="radio" name="style" value="moody-contrast" class="form-radio h-5 w-5 text-blue-600" />
-          <span>Moody & Contrasty</span>
-        </label>
-        <label class="flex items-center space-x-3">
-          <input type="radio" name="style" value="warm-sunset" class="form-radio h-5 w-5 text-blue-600" />
-          <span>Warm Sunset</span>
-        </label>
-        <label class="flex items-center space-x-3">
-          <input type="radio" name="style" value="cool-blue" class="form-radio h-5 w-5 text-blue-600" />
-          <span>Cool Blue</span>
-        </label>
-        <label class="flex items-center space-x-3">
-          <input type="radio" name="style" value="desaturated-matte" class="form-radio h-5 w-5 text-blue-600" />
-          <span>Desaturated Matte</span>
-        </label>
-      </div>
+      <div id="style-options" class="grid grid-cols-3 gap-4"></div>
     </section>
 
     <!-- Analyze Button -->
@@ -67,7 +48,81 @@
     </section>
   </main>
 
-  <!-- Placeholder for JS -->
-  <script src="app.js"></script>
+  <!-- Inline JS Logic -->
+  <script>
+    // Expandable presets: add or modify styles here
+    const stylePresets = {
+      'bright-airy': ['Basic → Exposure +0.7, Contrast -10, Highlights -20, Shadows +40; Presence → Clarity +15, Vibrance +20; Tone Curve → soft S; HSL → boost greens, mute reds; Color Grading → warm highlights; Effects → light vignette'],
+      'moody-contrast': ['Basic → Exposure -0.3, Contrast +30, Highlights -40, Shadows +20; Presence → Clarity +30; Tone Curve → deep S; HSL → boost blues; Color Grading → teal shadows, orange highlights; Effects → strong vignette'],
+      'warm-sunset': ['Basic → Temp +15, Tint +5, Exposure +0.2; Presence → Vibrance +15; Tone Curve → slight lift; HSL → warm yellows; Color Grading → golden highlights; Effects → subtle grain'],
+      'cool-blue': ['Basic → Temp -15, Tint -5, Exposure +0.2; Presence → Dehaze +5; Tone Curve → mid S; HSL → strong blues; Color Grading → cool shadows; Effects → slight vignette'],
+      'desaturated-matte': ['Basic → Exposure +0.1, Contrast +10; Presence → Vibrance -20; Tone Curve → flat S; HSL → reduce saturation; Color Grading → neutral; Effects → matte finish'],
+      'cinematic': ['Basic → Exposure -0.2, Contrast +25; Presence → Clarity +20; Tone Curve → pronounced S; HSL → teal/orange split; Color Grading → teal shadows, orange highlights; Effects → film grain'],
+      'black-white': ['Basic → Convert B&W; Exposure +0.3, Contrast +40; Presence → Clarity +30; Tone Curve → high contrast; HSL → n/a; Color Grading → silver tone; Effects → grain'],
+      'vintage-film': ['Basic → Exposure -0.1, Contrast +10; Presence → Dehaze -10; Tone Curve → gentle curve; HSL → muted reds; Color Grading → warm midtones; Effects → heavy grain, faded blacks'],
+      'high-key': ['Basic → Exposure +1.0, Contrast -20, Highlights -30; Presence → Clarity -10; Tone Curve → lift blacks; HSL → muted colors; Color Grading → bright midtones; Effects → minimal vignette'],
+      'low-key': ['Basic → Exposure -0.8, Contrast +40, Shadows -50; Presence → Clarity +25; Tone Curve → crush blacks; HSL → desaturate; Color Grading → deep shadows; Effects → strong vignette'],
+      'teal-orange': ['Basic → Contrast +20; Presence → Clarity +15; Tone Curve → medium S; HSL → boost oranges + blues; Color Grading → teal shadows, orange highlights; Effects → light grain'],
+      'pastel-dream': ['Basic → Exposure +0.5, Contrast -10; Presence → Saturation -20; Tone Curve → gentle lift; HSL → pastel hues; Color Grading → soft pink highlights; Effects → glow'],
+      'retro-pop': ['Basic → Contrast +30, Vibrance +30; Presence → Clarity -5; Tone Curve → high midtones; HSL → boost magentas; Color Grading → pop colors; Effects → vignette'],
+      'cross-process': ['Basic → Contrast +15; Presence → Clarity +10; Tone Curve → inverted curves; HSL → shifted hues; Color Grading → unnatural tints; Effects → grain'],
+      'infrared': ['Basic → Infrared conversion; Highlights +20; Shadows -10; Presence → Dehaze +20; Tone Curve → contrast; HSL → remove greens; Color Grading → deep reds; Effects → glow'],
+      'matte-finish': ['Basic → Contrast -5; Presence → Clarity -10; Tone Curve → flatten; HSL → neutral; Color Grading → matte midtones; Effects → matte grain'],
+      'high-contrast-bw': ['Basic → B&W, Contrast +50; Presence → Clarity +40; Tone Curve → extreme S; Effects → grain'],
+      'sepia-tone': ['Basic → B&W; Temperature +30; Presence → Vibrance 0; Color Grading → sepia midtones; Effects → soft vignette'],
+      'golden-hour': ['Basic → Temp +25, Tint +10; Exposure +0.3; Presence → Vibrance +20; Tone Curve → lift highlights; HSL → boost oranges; Effects → glow'],
+      'nightscape': ['Basic → Exposure -0.5, Contrast +25; Presence → Noise Reduction Luminance +50; Color Grading → cool highlights; Effects → dehaze'],
+      'urban-grit': ['Basic → Contrast +30; Presence → Clarity +35; Tone Curve → mid S; HSL → desaturate blues; Effects → grain'],
+      'tropical-vibes': ['Basic → Temperature +10, Saturation +20; Presence → Vibrance +30; HSL → boost greens; Effects → slight vignette'],
+      'faded-pastel': ['Basic → Contrast -15, Exposure +0.2; Presence → Saturation -30; HSL → pastel shift; Effects → fade'],
+      'vibrant-colors': ['Basic → Contrast +20, Saturation +40; Presence → Vibrance +50; HSL → boost all colors; Effects → minimal'],
+      'muted-earth-tones': ['Basic → Contrast -5, Vibrance -20; HSL → boost browns; Color Grading → warm shadows; Effects → matte'],
+      'moody-silhouette': ['Basic → Exposure -1.0; Presence → Clarity +15; Tone Curve → crush blacks; Effects → vignette'],
+      'dramatic-skies': ['Basic → Exposure +0.2, Contrast +30; Presence → Dehaze +40; Tone Curve → contrast; HSL → boost blues; Effects → vignette'],
+      'warm-portrait': ['Basic → Temperature +5, Tint +5; Presence → Texture -10; Tone Curve → smooth; Color Grading → warm skin tones; Effects → slight grain'],
+      'cool-portrait': ['Basic → Temperature -5, Tint -5; Presence → Texture -5; Tone Curve → soft; Color Grading → cool skin tones; Effects → minimal']
+    };
+
+    // Render style radio buttons dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('style-options');
+      Object.keys(stylePresets).forEach((key, i) => {
+        const label = document.createElement('label');
+        label.className = 'flex items-center space-x-3';
+        const input = document.createElement('input');
+        input.type = 'radio'; input.name = 'style'; input.value = key;
+        input.className = 'form-radio h-5 w-5 text-blue-600';
+        if (i === 0) input.checked = true;
+        const span = document.createElement('span');
+        span.textContent = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        label.appendChild(input); label.appendChild(span);
+        container.appendChild(label);
+      });
+    });
+
+    // File upload handler
+    document.getElementById('photo-upload').addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const url = URL.createObjectURL(file);
+      const img = document.getElementById('preview'); img.src = url;
+      img.onload = () => img.classList.remove('hidden');
+    });
+
+    // Analyze and display suggestions
+    document.getElementById('analyze-btn').addEventListener('click', () => {
+      const img = document.getElementById('preview');
+      if (!img.src) return alert('Please upload an image first.');
+      const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d');
+      canvas.width = img.naturalWidth; canvas.height = img.naturalHeight; ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let total = 0; for (let i = 0; i < data.length; i += 4) total += 0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
+      const avg = Math.round(total/(canvas.width*canvas.height));
+      const style = document.querySelector('input[name="style"]:checked').value;
+      const suggestions = stylePresets[style] || [];
+      const list = document.getElementById('suggestions'); list.innerHTML = `<li><strong>Average Brightness:</strong> ${avg}</li>`;
+      suggestions.forEach(s => { list.innerHTML += `<li>${s}</li>`; });
+      document.getElementById('result-section').classList.remove('hidden');
+    });
+  </script>
 </body>
 </html>
