@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lightroom Edit Companion</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center p-6">
+  <!-- Header -->
+  <header class="mb-8 text-center">
+    <h1 class="text-3xl font-semibold">Lightroom Edit Companion</h1>
+    <p class="text-gray-600 mt-2">Upload your photo and choose a style to get Lightroom slider suggestions.</p>
+  </header>
+
+  <!-- Main Content -->
+  <main class="w-full max-w-2xl bg-white rounded-lg shadow p-6">
+    <!-- Upload Section -->
+    <section id="upload-section" class="mb-6">
+      <label for="photo-upload" class="block mb-2 font-medium">Upload Photo</label>
+      <div id="upload-area" class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v8m0 0l-4-4m4 4l4-4" />
+        </svg>
+        <p class="text-gray-500">Drag & drop an image here, or click to select</p>
+        <input type="file" id="photo-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" />
+      </div>
+    </section>
+
+    <!-- Style Selector -->
+    <section id="style-section" class="mb-6">
+      <h2 class="text-xl font-medium mb-2">Choose a Style</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <label class="flex items-center space-x-3">
+          <input type="radio" name="style" value="bright-airy" class="form-radio h-5 w-5 text-blue-600" checked />
+          <span>Bright & Airy</span>
+        </label>
+        <label class="flex items-center space-x-3">
+          <input type="radio" name="style" value="moody-contrast" class="form-radio h-5 w-5 text-blue-600" />
+          <span>Moody & Contrasty</span>
+        </label>
+        <label class="flex items-center space-x-3">
+          <input type="radio" name="style" value="warm-sunset" class="form-radio h-5 w-5 text-blue-600" />
+          <span>Warm Sunset</span>
+        </label>
+        <label class="flex items-center space-x-3">
+          <input type="radio" name="style" value="cool-blue" class="form-radio h-5 w-5 text-blue-600" />
+          <span>Cool Blue</span>
+        </label>
+        <label class="flex items-center space-x-3">
+          <input type="radio" name="style" value="desaturated-matte" class="form-radio h-5 w-5 text-blue-600" />
+          <span>Desaturated Matte</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Analyze Button -->
+    <button id="analyze-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+      Analyze Photo
+    </button>
+
+    <!-- Results Section (Hidden by Default) -->
+    <section id="result-section" class="mt-8 hidden">
+      <h2 class="text-xl font-medium mb-4">Lightroom Slider Suggestions</h2>
+      <ul id="suggestions" class="space-y-2 list-disc list-inside text-gray-700"></ul>
+    </section>
+  </main>
+
+  <!-- Placeholder for JS -->
+  <script src="app.js"></script>
+</body>
+</html>
